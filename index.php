@@ -1,20 +1,37 @@
+<?php
+session_start();
+
+mb_internal_encoding('UTF-8');
+mb_http_output('UTF-8');
+?>
+
 <!-- Página inicial -->
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="AirFrete - Encontre o melhor frete aéreo com facilidade e praticidade"/>
     <meta name="keywords" content="frete aéreo, transporte, logística, AirFrete" />
-    <meta name="author" content="Alecsandro Sales" />
     <title>AirFrete - Encontre seu frete ideal</title>
+    <link rel="stylesheet" href="./styles/default.css">
 </head>
 <body>
     <header>
         <div class="logo">AIR FRETE</div>
         <div class="about">
-            <button>Login</button>
-            <button>Cadastro</button>
+            <?php if (isset($_SESSION['usuario_id'])): ?>
+                <!-- Usuário logado -->
+                <div class="user-welcome">
+                    <span>Bem-vindo, <?php echo htmlspecialchars($_SESSION['usuario_nome']); ?>!</span>
+                    <button><a href="ofertas.php">Minhas Ofertas</a></button>
+                    <button><a href="ofertas.php?logout=1">Sair</a></button>
+                </div>
+            <?php else: ?>
+                <!-- Usuário não logado -->
+                <button><a href="login.php">Login</a></button>
+                <button><a href="cadastro.php">Cadastro</a></button>
+            <?php endif; ?>
         </div>
     </header>
 
@@ -38,7 +55,7 @@
                     </select>
                 </div>
                 <div class="price">
-                    <label for="range">Preço:</label>
+                    <label for="range">Valor:</label>
                     <input type="range" id="range" min="0" max="9999" step="50" />
                     <div class="range-labels">
                         <span>R$ 0</span>
