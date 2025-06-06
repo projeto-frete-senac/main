@@ -1,4 +1,8 @@
 <?php
+header('Content-Type: text/html; charset=UTF-8');
+mb_internal_encoding('UTF-8');
+mb_http_output('UTF-8');
+
 session_start();
 require_once 'config/db.php';
 
@@ -14,42 +18,45 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $senha = $_POST['senha'];
     $confirmar_senha = $_POST['confirmar_senha'];
     
-    // Validações
+    // Validaï¿½ï¿½es
     if (empty($username) || empty($email) || empty($senha) || empty($confirmar_senha)) {
-        $erro = 'Todos os campos são obrigatórios.';
+        $erro = 'Todos os campos sÃ£o obrigatÃ³rios.';
     } elseif ($senha !== $confirmar_senha) {
-        $erro = 'As senhas não coincidem.';
+        $erro = 'As senhas nÃ£o coincidem.';
     } elseif (strlen($senha) < 6) {
         $erro = 'A senha deve ter pelo menos 6 caracteres.';
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $erro = 'Email inválido.';
+        $erro = 'Email invÃ¡lido.';
     } else {
         try {
-            // Verificar se o email já existe
+            // Verificar se o email jï¿½ existe
             $stmt = $pdo->prepare("SELECT id FROM usuario WHERE email = ?");
             $stmt->execute([$email]);
             
             if ($stmt->rowCount() > 0) {
-                $erro = 'Este email já está cadastrado.';
+                $erro = 'Este email jÃ¡ estÃ¡ cadastrado.';
             } else {
-                // Inserir novo usuário
-                $stmt = $pdo->prepare("INSERT INTO usuario (nome, email, senha) VALUES (?, ?, ?)");
-                $stmt->execute([$username, $email, $senha]);
+                // ALTERAï¿½ï¿½O: Gerar hash da senha
+                $senha_hash = password_hash($senha, PASSWORD_DEFAULT);
                 
-                // Obter o ID do usuário recém-cadastrado
+                // Inserir novo usuÃ¡rio com senha hasheada
+                $stmt = $pdo->prepare("INSERT INTO usuario (nome, email, senha) VALUES (?, ?, ?)");
+                $stmt->execute([$username, $email, $senha_hash]);
+                
+                // Obter o ID do usuÃ¡rio recï¿½m-cadastrado
                 $usuario_id = $pdo->lastInsertId();
                 
-                // Fazer login automático
+                // Fazer login automï¿½tico
                 $_SESSION['usuario_id'] = $usuario_id;
                 $_SESSION['usuario_nome'] = $username;
                 $_SESSION['usuario_email'] = $email;
                 
-                // Redirecionar para a página de ofertas
+                // Redirecionar para a pï¿½gina de ofertas
                 header('Location: ofertas.php');
                 exit;
             }
         } catch (PDOException $e) {
-            $erro = 'Erro ao cadastrar usuário. Tente novamente.';
+            $erro = 'Erro ao cadastrar usuÃ¡rio. Tente novamente.';
         }
     }
 }
@@ -63,7 +70,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <title>Cadastro - AirFrete</title>
     <link rel="stylesheet" href="./styles/default.css">
     <style>
-        /* Reset e configurações globais */
+            /* Reset e configuraï¿½ï¿½es globais */
 * {
     margin: 0;
     padding: 0;
@@ -114,7 +121,7 @@ header {
     font-weight: 500;
 }
 
-/* Botões do header */
+/* Botï¿½es do header */
 header button {
     background: #1d4ed8;
     color: white;
@@ -205,7 +212,7 @@ header button a {
     color: #6b7280;
 }
 
-/* Área principal (cards) */
+/* ï¿½rea principal (cards) */
 .right {
     flex: 1;
     display: flex;
@@ -278,7 +285,7 @@ header button a {
     transform: scale(1.1);
 }
 
-/* Formulários (Login/Cadastro) */
+/* Formulï¿½rios (Login/Cadastro) */
 .form-container {
     max-width: 400px;
     margin: 50px auto;
@@ -371,7 +378,7 @@ header button a {
     border: 1px solid #a7f3d0;
 }
 
-/* Página de Ofertas */
+/* Pï¿½gina de Ofertas */
 .header {
     background: linear-gradient(135deg, #e5e7eb 0%, #f3f4f6 100%);
     padding: 20px 40px;
@@ -540,7 +547,7 @@ header button a {
         
         <form method="POST" action="">
             <div class="form-group">
-                <label for="username">Nome de usuário:</label>
+                <label for="username">Nome de usuÃ¡rio:</label>
                 <input type="text" id="username" name="username" required 
                     value="<?php echo isset($_POST['username']) ? htmlspecialchars($_POST['username']) : ''; ?>">
             </div>
@@ -567,7 +574,7 @@ header button a {
         </form>
         
         <div class="form-link">
-            <p>Já tem conta? <a href="login.php">Fazer login</a></p>
+            <p>JÃ¡ tem conta? <a href="login.php">Fazer login</a></p>
         </div>
     </div>
 </body>

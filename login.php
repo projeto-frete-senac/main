@@ -1,4 +1,9 @@
 <?php
+
+header('Content-Type: text/html; charset=UTF-8');
+mb_internal_encoding('UTF-8');
+mb_http_output('UTF-8');
+
 session_start();
 require_once 'config/db.php';
 
@@ -27,7 +32,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $stmt->execute([$email]);
             $usuario = $stmt->fetch();
             
-            if ($usuario && $usuario['senha'] === $senha) {
+            // ALTERAÇÃO: Verificar senha usando password_verify
+            if ($usuario && password_verify($senha, $usuario['senha'])) {
                 // Login bem-sucedido
                 $_SESSION['usuario_id'] = $usuario['id'];
                 $_SESSION['usuario_nome'] = $usuario['nome'];
