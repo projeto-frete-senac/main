@@ -405,50 +405,79 @@ header {
     font-style: italic;
 }
 
-/* Botão de navegação */
-.next-btn {
-    background: linear-gradient(45deg, #10b981, #059669);
-    color: white;
-    border: none;
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    font-size: 24px;
-    cursor: pointer;
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
-    position: relative;
-    overflow: hidden;
-    animation: bounce 2s infinite;
+.carrossel-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 1000px;
+  margin: 40px auto;
+  overflow: hidden;
+  padding: 0 40px;
+  box-sizing: border-box;
 }
 
-.next-btn::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 0;
-    height: 0;
-    background: rgba(255, 255, 255, 0.3);
-    border-radius: 50%;
-    transform: translate(-50%, -50%);
-    transition: all 0.4s ease;
+.carrossel {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  gap: 20px;
+  padding: 20px 0;
+  scrollbar-width: none;
 }
 
-.next-btn:hover::before {
-    width: 200px;
-    height: 200px;
+.carrossel::-webkit-scrollbar {
+  display: none;
 }
 
-.next-btn:hover {
-    transform: translateY(-5px) scale(1.1);
-    box-shadow: 0 15px 40px rgba(16, 185, 129, 0.6);
-    animation: none;
+.oferta-card {
+  flex: 0 0 auto;
+  width: 250px;
+  height: 160px;
+  background: white;
+  border-radius: 10px;
+  padding: 20px;
+  scroll-snap-align: start;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+  transition: transform 0.3s;
+  margin-left: 10px;
 }
 
-.next-btn:active {
-    transform: translateY(-2px) scale(1.05);
+.oferta-card:hover {
+  transform: scale(1.05);
+  cursor: pointer;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.35);
+  transition-duration: .2s;
 }
+
+.oferta-card-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.carrossel-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: rgba(0, 0, 0, 0.5);
+  border: none;
+  color: white;
+  font-size: 24px;
+  padding: 10px;
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 100;
+}
+
+#prev-btn {
+  left: 10px;
+}
+
+#next-btn {
+    position: fixed;
+    right: 100px;
+}
+
+
 
 /* Responsividade */
 @media (max-width: 1024px) {

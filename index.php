@@ -70,18 +70,33 @@ mb_http_output('UTF-8');
         </aside>
 
         <section class="right">
-            <div class="card_Container">
-                <div class="card">
-                    <h3>Roberto Da Cruz</h3>
-                    <div class="priceContainer">
-                        <span>R$</span><p>500</p>
-                    </div>
-                    <div class="description">
-                        Lorem ipsum dolor sit, amet consectetur adipisicing elit.
-                    </div>
+            <div class="carrossel-wrapper">
+                <button id="prev-btn" class="carrossel-btn">&#10094;</button>
+                <div class="carrossel" id="carrossel-ofertas">
+                    <?php
+                    // PHP para listar somente ofertas ativas
+                    require_once 'config/db.php';
+                    $sql = "SELECT * FROM ofertas WHERE status = 'ativa'";
+                    $stmt = $pdo->prepare($sql);
+                    $stmt->execute();
+                    $ofertas = $stmt->fetchAll();
+                    // Adiciona link para a página da oferta
+                    // Supondo que existe uma página oferta.php?id=ID
+                    // O card vira um link clicável
+
+                    foreach ($ofertas as $oferta) {
+                        echo "<a href='oferta.php?id={$oferta['id']}' class='oferta-card-link'>";
+                        echo "<div class='oferta-card'>";
+                        echo "<h3>De: {$oferta['origem']}</h3>";
+                        echo "<p>Para: {$oferta['destino']}</p>";
+                        echo "<p>Preço: R$ {$oferta['preco']}</p>";
+                        echo "</div>";
+                        echo "</a>";
+                    }
+                    ?>
                 </div>
+                <button id="next-btn" class="carrossel-btn">&#10095;</button>
             </div>
-            <button class="next-btn">&rarr;</button>
         </section>
     </main>
 
@@ -90,6 +105,16 @@ mb_http_output('UTF-8');
             const value = e.target.value;
             const labels = document.querySelectorAll('.range-labels span');
             labels[1].textContent = 'R$ ' + value;
+        });
+
+        const carrossel = document.getElementById("carrossel-ofertas");
+
+        document.getElementById("prev-btn").addEventListener("click", () => {
+            carrossel.scrollBy({ left: -300, behavior: "smooth" });
+        });
+
+        document.getElementById("next-btn").addEventListener("click", () => {
+            carrossel.scrollBy({ left: 300, behavior: "smooth" });
         });
     </script>
 </body>
