@@ -1,581 +1,123 @@
-<?php
-header('Content-Type: text/html; charset=UTF-8');
-mb_internal_encoding('UTF-8');
-mb_http_output('UTF-8');
+    <?php
+    header('Content-Type: text/html; charset=UTF-8');
+    mb_internal_encoding('UTF-8');
+    mb_http_output('UTF-8');
 
-session_start();
-require_once 'config/db.php';
+    session_start();
+    require_once 'config/db.php';
 
-mb_internal_encoding('UTF-8');
-mb_http_output('UTF-8');
+    mb_internal_encoding('UTF-8');
+    mb_http_output('UTF-8');
 
-$erro = '';
-$sucesso = '';
+    $erro = '';
+    $sucesso = '';
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $username = trim($_POST['username']);
-    $email = trim($_POST['email']);
-    $senha = $_POST['senha'];
-    $confirmar_senha = $_POST['confirmar_senha'];
-    
-    // Valida��es
-    if (empty($username) || empty($email) || empty($senha) || empty($confirmar_senha)) {
-        $erro = 'Todos os campos são obrigatórios.';
-    } elseif ($senha !== $confirmar_senha) {
-        $erro = 'As senhas não coincidem.';
-    } elseif (strlen($senha) < 6) {
-        $erro = 'A senha deve ter pelo menos 6 caracteres.';
-    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $erro = 'Email inválido.';
-    } else {
-        try {
-            // Verificar se o email j� existe
-            $stmt = $pdo->prepare("SELECT id FROM usuario WHERE email = ?");
-            $stmt->execute([$email]);
-            
-            if ($stmt->rowCount() > 0) {
-                $erro = 'Este email já está cadastrado.';
-            } else {
-                // ALTERA��O: Gerar hash da senha
-                $senha_hash = password_hash($senha, PASSWORD_DEFAULT);
+    if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+        $username = trim($_POST['username']);
+        $email = trim($_POST['email']);
+        $senha = $_POST['senha'];
+        $confirmar_senha = $_POST['confirmar_senha'];
+        
+        // Valida��es
+        if (empty($username) || empty($email) || empty($senha) || empty($confirmar_senha)) {
+            $erro = 'Todos os campos são obrigatórios.';
+        } elseif ($senha !== $confirmar_senha) {
+            $erro = 'As senhas não coincidem.';
+        } elseif (strlen($senha) < 6) {
+            $erro = 'A senha deve ter pelo menos 6 caracteres.';
+        } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $erro = 'Email inválido.';
+        } else {
+            try {
+                // Verificar se o email j� existe
+                $stmt = $pdo->prepare("SELECT id FROM usuario WHERE email = ?");
+                $stmt->execute([$email]);
                 
-                // Inserir novo usuário com senha hasheada
-                $stmt = $pdo->prepare("INSERT INTO usuario (nome, email, senha) VALUES (?, ?, ?)");
-                $stmt->execute([$username, $email, $senha_hash]);
-                
-                // Obter o ID do usuário rec�m-cadastrado
-                $usuario_id = $pdo->lastInsertId();
-                
-                // Fazer login autom�tico
-                $_SESSION['usuario_id'] = $usuario_id;
-                $_SESSION['usuario_nome'] = $username;
-                $_SESSION['usuario_email'] = $email;
-                
-                // Redirecionar para a p�gina de ofertas
-                header('Location: ofertas.php');
-                exit;
+                if ($stmt->rowCount() > 0) {
+                    $erro = 'Este email já está cadastrado.';
+                } else {
+                    // ALTERA��O: Gerar hash da senha
+                    $senha_hash = password_hash($senha, PASSWORD_DEFAULT);
+                    
+                    // Inserir novo usuário com senha hasheada
+                    $stmt = $pdo->prepare("INSERT INTO usuario (nome, email, senha) VALUES (?, ?, ?)");
+                    $stmt->execute([$username, $email, $senha_hash]);
+                    
+                    // Obter o ID do usuário rec�m-cadastrado
+                    $usuario_id = $pdo->lastInsertId();
+                    
+                    // Fazer login autom�tico
+                    $_SESSION['usuario_id'] = $usuario_id;
+                    $_SESSION['usuario_nome'] = $username;
+                    $_SESSION['usuario_email'] = $email;
+                    
+                    // Redirecionar para a p�gina de ofertas
+                    header('Location: ofertas.php');
+                    exit;
+                }
+            } catch (PDOException $e) {
+                $erro = 'Erro ao cadastrar usuário. Tente novamente.';
             }
-        } catch (PDOException $e) {
-            $erro = 'Erro ao cadastrar usuário. Tente novamente.';
         }
     }
-}
-?>
+    ?>
 
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cadastro - AirFrete</title>
-    <link rel="stylesheet" href="./styles/default.css">
-    <style>
-            /* Reset e configura��es globais */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-body {
-    font-family: 'Arial', sans-serif;
-    background: linear-gradient(135deg, #e5e7eb 0%, #f3f4f6 100%);
-    min-height: 100vh;
-    color: #333;
-}
-
-/* Header */
-header {
-    background: linear-gradient(135deg, #e5e7eb 0%, #f3f4f6 100%);
-    padding: 20px 40px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-}
-
-.logo {
-    font-size: 32px;
-    font-weight: bold;
-    background: linear-gradient(45deg, #8b5cf6, #3b82f6);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    text-shadow: none;
-}
-
-.about {
-    display: flex;
-    gap: 15px;
-    align-items: center;
-}
-
-.user-welcome {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-}
-
-.user-welcome span {
-    color: #4b5563;
-    font-weight: 500;
-}
-
-/* Bot�es do header */
-header button {
-    background: #1d4ed8;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 25px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-weight: 500;
-}
-
-header button:hover {
-    background: #1e40af;
-    transform: translateY(-2px);
-}
-
-header button a {
-    color: white;
-    text-decoration: none;
-}
-
-/* Container principal */
-.container {
-    display: flex;
-    padding: 40px;
-    gap: 30px;
-    max-width: 1200px;
-    margin: 0 auto;
-}
-
-/* Menu lateral (filtros) */
-.menu {
-    flex: 0 0 300px;
-}
-
-.cardFilter {
-    background: white;
-    padding: 25px;
-    border-radius: 15px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-}
-
-.field {
-    margin-bottom: 20px;
-}
-
-.field label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: 600;
-    color: #374151;
-}
-
-.field select {
-    width: 100%;
-    padding: 12px;
-    border: 2px solid #e5e7eb;
-    border-radius: 8px;
-    font-size: 14px;
-    transition: border-color 0.3s ease;
-}
-
-.field select:focus {
-    outline: none;
-    border-color: #3b82f6;
-}
-
-.price {
-    margin-top: 25px;
-}
-
-.price label {
-    display: block;
-    margin-bottom: 15px;
-    font-weight: 600;
-    color: #374151;
-}
-
-.price input[type="range"] {
-    width: 100%;
-    margin-bottom: 10px;
-}
-
-.range-labels {
-    display: flex;
-    justify-content: space-between;
-    font-size: 12px;
-    color: #6b7280;
-}
-
-/* �rea principal (cards) */
-.right {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    gap: 20px;
-}
-
-.card_Container {
-    flex: 1;
-}
-
-.card {
-    background: white;
-    padding: 25px;
-    border-radius: 15px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    margin-bottom: 20px;
-    transition: transform 0.3s ease;
-}
-
-.card:hover {
-    transform: translateY(-5px);
-}
-
-.card h3 {
-    color: #1f2937;
-    margin-bottom: 15px;
-    font-size: 18px;
-}
-
-.priceContainer {
-    display: flex;
-    align-items: baseline;
-    margin-bottom: 15px;
-}
-
-.priceContainer span {
-    font-size: 16px;
-    color: #6b7280;
-    margin-right: 5px;
-}
-
-.priceContainer p {
-    font-size: 24px;
-    font-weight: bold;
-    color: #1d4ed8;
-    margin: 0;
-}
-
-.description {
-    color: #6b7280;
-    font-size: 14px;
-    line-height: 1.5;
-}
-
-.next-btn {
-    background: #1d4ed8;
-    color: white;
-    border: none;
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    font-size: 20px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.next-btn:hover {
-    background: #1e40af;
-    transform: scale(1.1);
-}
-
-/* Formul�rios (Login/Cadastro) */
-.form-container {
-    max-width: 400px;
-    margin: 50px auto;
-    background: white;
-    padding: 40px;
-    border-radius: 15px;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
-}
-
-.form-container h1 {
-    text-align: center;
-    margin-bottom: 30px;
-    background: linear-gradient(45deg, #8b5cf6, #3b82f6);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
-.form-group {
-    margin-bottom: 20px;
-}
-
-.form-group label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: 600;
-    color: #374151;
-}
-
-.form-group input {
-    width: 100%;
-    padding: 12px;
-    border: 2px solid #e5e7eb;
-    border-radius: 8px;
-    font-size: 14px;
-    transition: border-color 0.3s ease;
-}
-
-.form-group input:focus {
-    outline: none;
-    border-color: #3b82f6;
-}
-
-.form-group button {
-    width: 100%;
-    background: #1d4ed8;
-    color: white;
-    border: none;
-    padding: 12px;
-    border-radius: 8px;
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.3s ease;
-}
-
-.form-group button:hover {
-    background: #1e40af;
-}
-
-.form-link {
-    text-align: center;
-    margin-top: 20px;
-}
-
-.form-link a {
-    color: #1d4ed8;
-    text-decoration: none;
-}
-
-.form-link a:hover {
-    text-decoration: underline;
-}
-
-.error {
-    background: #fee2e2;
-    color: #dc2626;
-    padding: 12px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    border: 1px solid #fecaca;
-}
-
-.success {
-    background: #d1fae5;
-    color: #059669;
-    padding: 12px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    border: 1px solid #a7f3d0;
-}
-
-/* P�gina de Ofertas */
-.header {
-    background: linear-gradient(135deg, #e5e7eb 0%, #f3f4f6 100%);
-    padding: 20px 40px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    margin-bottom: 40px;
-}
-
-.user-info {
-    text-align: right;
-    color: #4b5563;
-}
-
-.oferta-card {
-    max-width: 900px;
-    margin: 0 auto;
-    background: linear-gradient(135deg, #1d4ed8 0%, #3b82f6 100%);
-    border-radius: 20px;
-    padding: 40px;
-    color: white;
-    box-shadow: 0 10px 40px rgba(29, 78, 216, 0.3);
-}
-
-.oferta-header {
-    font-size: 28px;
-    font-weight: bold;
-    margin-bottom: 30px;
-    text-align: left;
-}
-
-.oferta-details {
-    background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%);
-    border-radius: 15px;
-    padding: 25px;
-    margin-bottom: 30px;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 20px;
-    align-items: center;
-}
-
-.detail-item {
-    text-align: center;
-}
-
-.detail-label {
-    font-size: 14px;
-    opacity: 0.9;
-    margin-bottom: 8px;
-}
-
-.detail-value {
-    font-size: 18px;
-    font-weight: bold;
-}
-
-.status-icon {
-    background: #22c55e;
-    color: white;
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto;
-    font-weight: bold;
-}
-
-.buttons {
-    display: flex;
-    gap: 15px;
-    justify-content: flex-start;
-}
-
-.btn {
-    padding: 12px 25px;
-    border: none;
-    border-radius: 25px;
-    font-weight: 600;
-    cursor: pointer;
-    text-decoration: none;
-    display: inline-block;
-    transition: all 0.3s ease;
-}
-
-.btn-edit {
-    background: white;
-    color: #1d4ed8;
-}
-
-.btn-edit:hover {
-    background: #f8fafc;
-    transform: translateY(-2px);
-}
-
-.btn-delete {
-    background: #ef4444;
-    color: white;
-}
-
-.btn-delete:hover {
-    background: #dc2626;
-    transform: translateY(-2px);
-}
-
-.btn-logout {
-    background: #ef4444;
-    color: white;
-    padding: 8px 16px;
-    font-size: 14px;
-}
-
-.btn-logout:hover {
-    background: #dc2626;
-}
-
-/* Responsividade */
-@media (max-width: 768px) {
-    .container {
-        flex-direction: column;
-        padding: 20px;
-    }
-    
-    .menu {
-        flex: none;
-    }
-    
-    header {
-        padding: 15px 20px;
-        flex-direction: column;
-        gap: 15px;
-    }
-    
-    .logo {
-        font-size: 24px;
-    }
-    
-    .oferta-details {
-        grid-template-columns: 1fr;
-    }
-    
-    .buttons {
-        justify-content: center;
-    }
-}
-    </style>
-</head>
-<body>
-    <div class="form-container">
-        <h1>Cadastro - AirFrete</h1>
+    <!DOCTYPE html>
+    <html lang="pt-BR">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Cadastro - AirFrete</title>
+        <link rel="stylesheet" href="./styles/cadastro.css">
         
-        <?php if ($erro): ?>
-            <div class="error">
-                <?php echo htmlspecialchars($erro); ?>
-            </div>
-        <?php endif; ?>
-        
-        <?php if ($sucesso): ?>
-            <div class="success">
-                <?php echo htmlspecialchars($sucesso); ?>
-            </div>
-        <?php endif; ?>
-        
-        <form method="POST" action="">
-            <div class="form-group">
-                <label for="username">Nome de usuário:</label>
-                <input type="text" id="username" name="username" required 
-                    value="<?php echo isset($_POST['username']) ? htmlspecialchars($_POST['username']) : ''; ?>">
-            </div>
+    </head>
+    <body>
+        <div class="form-container">
+            <h1>Cadastro - AirFrete</h1>
             
-            <div class="form-group">
-                <label for="email">Email:</label>
-                <input type="email" id="email" name="email" required 
-                    value="<?php echo isset($_POST['email']) ? htmlspecialchars($_POST['email']) : ''; ?>">
-            </div>
+            <?php if ($erro): ?>
+                <div class="error">
+                    <?php echo htmlspecialchars($erro); ?>
+                </div>
+            <?php endif; ?>
             
-            <div class="form-group">
-                <label for="senha">Senha:</label>
-                <input type="password" id="senha" name="senha" required>
-            </div>
+            <?php if ($sucesso): ?>
+                <div class="success">
+                    <?php echo htmlspecialchars($sucesso); ?>
+                </div>
+            <?php endif; ?>
             
-            <div class="form-group">
-                <label for="confirmar_senha">Confirmar senha:</label>
-                <input type="password" id="confirmar_senha" name="confirmar_senha" required>
-            </div>
+            <form method="POST" action="">
+                <div class="form-group">
+                    <label for="username">Nome de usuário:</label>
+                    <input type="text" id="username" name="username" required 
+                        value="<?php echo isset($_POST['username']) ? htmlspecialchars($_POST['username']) : ''; ?>">
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email" required 
+                        value="<?php echo isset($_POST['email']) ? htmlspecialchars($_POST['email']) : ''; ?>">
+                </div>
+                
+                <div class="form-group">
+                    <label for="senha">Senha:</label>
+                    <input type="password" id="senha" name="senha" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="confirmar_senha">Confirmar senha:</label>
+                    <input type="password" id="confirmar_senha" name="confirmar_senha" required>
+                </div>
+                
+                <div class="form-group">
+                    <button type="submit">Cadastrar</button>
+                </div>
+            </form>
             
-            <div class="form-group">
-                <button type="submit">Cadastrar</button>
+            <div class="form-link">
+                <p>Já tem conta? <a href="login.php">Fazer login</a></p>
             </div>
-        </form>
-        
-        <div class="form-link">
-            <p>Já tem conta? <a href="login.php">Fazer login</a></p>
         </div>
-    </div>
-</body>
-</html>
+    </body>
+    </html>

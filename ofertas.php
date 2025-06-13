@@ -1,540 +1,322 @@
-<?php
-header('Content-Type: text/html; charset=UTF-8');
-mb_internal_encoding('UTF-8');
-mb_http_output('UTF-8');
-
-session_start();
-require_once 'config/db.php';
-
-mb_internal_encoding('UTF-8');
-mb_http_output('UTF-8');
-
-// Verificar se o usu�rio est� logado
-if (!isset($_SESSION['usuario_id'])) {
-    header('Location: login.php');
-    exit;
-}
-
-// Fun��o para logout
-if (isset($_GET['logout'])) {
-    session_destroy();
-    header('Location: index.php');
-    exit;
-}
-?>
-
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minhas Ofertas - AirFrete</title>
-    <link rel="stylesheet" href="./styles/default.css">
-    <style>
-        @charset "UTF-8";
-        /* Reset e configura��es globais */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-body {
-    font-family: 'Arial', sans-serif;
-    background: linear-gradient(135deg, #e5e7eb 0%, #f3f4f6 100%);
-    min-height: 100vh;
-    color: #333;
-}
-
-/* Header */
-header {
-    background: linear-gradient(135deg, #e5e7eb 0%, #f3f4f6 100%);
-    padding: 20px 40px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-}
-
-.logo {
-    font-size: 32px;
-    font-weight: bold;
-    background: linear-gradient(45deg, #8b5cf6, #3b82f6);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    text-shadow: none;
-}
-
-.about {
-    display: flex;
-    gap: 15px;
-    align-items: center;
-}
-
-.user-welcome {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-}
-
-.user-welcome span {
-    color: #4b5563;
-    font-weight: 500;
-}
-
-/* Bot�es do header */
-header button {
-    background: #1d4ed8;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 25px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-weight: 500;
-}
-
-header button:hover {
-    background: #1e40af;
-    transform: translateY(-2px);
-}
-
-header button a {
-    color: white;
-    text-decoration: none;
-}
-
-/* Container principal */
-.container {
-    display: flex;
-    padding: 40px;
-    gap: 30px;
-    max-width: 1200px;
-    margin: 0 auto;
-}
-
-/* Menu lateral (filtros) */
-.menu {
-    flex: 0 0 300px;
-}
-
-.cardFilter {
-    background: white;
-    padding: 25px;
-    border-radius: 15px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-}
-
-.field {
-    margin-bottom: 20px;
-}
-
-.field label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: 600;
-    color: #374151;
-}
-
-.field select {
-    width: 100%;
-    padding: 12px;
-    border: 2px solid #e5e7eb;
-    border-radius: 8px;
-    font-size: 14px;
-    transition: border-color 0.3s ease;
-}
-
-.field select:focus {
-    outline: none;
-    border-color: #3b82f6;
-}
-
-.price {
-    margin-top: 25px;
-}
-
-.price label {
-    display: block;
-    margin-bottom: 15px;
-    font-weight: 600;
-    color: #374151;
-}
-
-.price input[type="range"] {
-    width: 100%;
-    margin-bottom: 10px;
-}
-
-.range-labels {
-    display: flex;
-    justify-content: space-between;
-    font-size: 12px;
-    color: #6b7280;
-}
-
-/* �rea principal (cards) */
-.right {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    gap: 20px;
-}
-
-.card_Container {
-    flex: 1;
-}
-
-.card {
-    background: white;
-    padding: 25px;
-    border-radius: 15px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    margin-bottom: 20px;
-    transition: transform 0.3s ease;
-}
-
-.card:hover {
-    transform: translateY(-5px);
-}
-
-.card h3 {
-    color: #1f2937;
-    margin-bottom: 15px;
-    font-size: 18px;
-}
-
-.priceContainer {
-    display: flex;
-    align-items: baseline;
-    margin-bottom: 15px;
-}
-
-.priceContainer span {
-    font-size: 16px;
-    color: #6b7280;
-    margin-right: 5px;
-}
-
-.priceContainer p {
-    font-size: 24px;
-    font-weight: bold;
-    color: #1d4ed8;
-    margin: 0;
-}
-
-.description {
-    color: #6b7280;
-    font-size: 14px;
-    line-height: 1.5;
-}
-
-.next-btn {
-    background: #1d4ed8;
-    color: white;
-    border: none;
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    font-size: 20px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.next-btn:hover {
-    background: #1e40af;
-    transform: scale(1.1);
-}
-
-/* Formul�rios (Login/Cadastro) */
-.form-container {
-    max-width: 400px;
-    margin: 50px auto;
-    background: white;
-    padding: 40px;
-    border-radius: 15px;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
-}
-
-.form-container h1 {
-    text-align: center;
-    margin-bottom: 30px;
-    background: linear-gradient(45deg, #8b5cf6, #3b82f6);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
-.form-group {
-    margin-bottom: 20px;
-}
-
-.form-group label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: 600;
-    color: #374151;
-}
-
-.form-group input {
-    width: 100%;
-    padding: 12px;
-    border: 2px solid #e5e7eb;
-    border-radius: 8px;
-    font-size: 14px;
-    transition: border-color 0.3s ease;
-}
-
-.form-group input:focus {
-    outline: none;
-    border-color: #3b82f6;
-}
-
-.form-group button {
-    width: 100%;
-    background: #1d4ed8;
-    color: white;
-    border: none;
-    padding: 12px;
-    border-radius: 8px;
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.3s ease;
-}
-
-.form-group button:hover {
-    background: #1e40af;
-}
-
-.form-link {
-    text-align: center;
-    margin-top: 20px;
-}
-
-.form-link a {
-    color: #1d4ed8;
-    text-decoration: none;
-}
-
-.form-link a:hover {
-    text-decoration: underline;
-}
-
-.error {
-    background: #fee2e2;
-    color: #dc2626;
-    padding: 12px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    border: 1px solid #fecaca;
-}
-
-.success {
-    background: #d1fae5;
-    color: #059669;
-    padding: 12px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    border: 1px solid #a7f3d0;
-}
-
-/* P�gina de Ofertas */
-.header {
-    background: linear-gradient(135deg, #e5e7eb 0%, #f3f4f6 100%);
-    padding: 20px 40px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    margin-bottom: 40px;
-}
-
-.user-info {
-    text-align: right;
-    color: #4b5563;
-}
-
-.oferta-card {
-    max-width: 900px;
-    margin: 0 auto;
-    background: linear-gradient(135deg, #1d4ed8 0%, #3b82f6 100%);
-    border-radius: 20px;
-    padding: 40px;
-    color: white;
-    box-shadow: 0 10px 40px rgba(29, 78, 216, 0.3);
-}
-
-.oferta-header {
-    font-size: 28px;
-    font-weight: bold;
-    margin-bottom: 30px;
-    text-align: left;
-}
-
-.oferta-details {
-    background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%);
-    border-radius: 15px;
-    padding: 25px;
-    margin-bottom: 30px;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 20px;
-    align-items: center;
-}
-
-.detail-item {
-    text-align: center;
-}
-
-.detail-label {
-    font-size: 14px;
-    opacity: 0.9;
-    margin-bottom: 8px;
-}
-
-.detail-value {
-    font-size: 18px;
-    font-weight: bold;
-}
-
-.status-icon {
-    background: #22c55e;
-    color: white;
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto;
-    font-weight: bold;
-}
-
-.buttons {
-    display: flex;
-    gap: 15px;
-    justify-content: flex-start;
-}
-
-.btn {
-    padding: 12px 25px;
-    border: none;
-    border-radius: 25px;
-    font-weight: 600;
-    cursor: pointer;
-    text-decoration: none;
-    display: inline-block;
-    transition: all 0.3s ease;
-}
-
-.btn-edit {
-    background: white;
-    color: #1d4ed8;
-}
-
-.btn-edit:hover {
-    background: #f8fafc;
-    transform: translateY(-2px);
-}
-
-.btn-delete {
-    background: #ef4444;
-    color: white;
-}
-
-.btn-delete:hover {
-    background: #dc2626;
-    transform: translateY(-2px);
-}
-
-.btn-logout {
-    background: #ef4444;
-    color: white;
-    padding: 8px 16px;
-    font-size: 14px;
-}
-
-.btn-logout:hover {
-    background: #dc2626;
-}
-
-/* Responsividade */
-@media (max-width: 768px) {
-    .container {
-        flex-direction: column;
-        padding: 20px;
+    <?php
+    header('Content-Type: text/html; charset=UTF-8');
+    mb_internal_encoding('UTF-8');
+    mb_http_output('UTF-8');
+
+    session_start();
+    require_once 'config/db.php';
+
+    mb_internal_encoding('UTF-8');
+    mb_http_output('UTF-8');
+
+    // Verificar se o usuário está logado
+    if (!isset($_SESSION['usuario_id'])) {
+        header('Location: login.php');
+        exit;
     }
-    
-    .menu {
-        flex: none;
+
+    // Função para logout
+    if (isset($_GET['logout'])) {
+        session_destroy();
+        header('Location: index.php');
+        exit;
     }
-    
-    header {
-        padding: 15px 20px;
-        flex-direction: column;
-        gap: 15px;
-    }
-    
-    .logo {
-        font-size: 24px;
-    }
-    
-    .oferta-details {
-        grid-template-columns: 1fr;
-    }
-    
-    .buttons {
-        justify-content: center;
-    }
-}
-    </style>
-</head>
-<body>
-    <div class="header">
-        <div class="logo">AirFrete</div>
-        <div class="user-info">
-            <div>Bem-vindo, <?php echo htmlspecialchars($_SESSION['usuario_nome']); ?>!</div>
-            <div style="margin-top: 5px;">
-                <a href="?logout=1" class="btn btn-logout">Sair</a>
-            </div>
-        </div>
-    </div>
-    
-    <div class="oferta-card">
-        <div class="oferta-header">Ol�, <?php echo htmlspecialchars($_SESSION['usuario_nome']); ?>!</div>
+
+    $erro = '';
+    $sucesso = '';
+    $modo = isset($_GET['modo']) ? $_GET['modo'] : 'listar';
+    $oferta_id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+
+    // CRIAR NOVA OFERTA
+    if ($_SERVER['REQUEST_METHOD'] == 'POST' && $modo == 'criar') {
+        $origem = trim($_POST['origem']);
+        $destino = trim($_POST['destino']);
+        $preco = floatval($_POST['preco']);
+        $descricao = trim($_POST['descricao']);
+        $tipo_carga = trim($_POST['tipo_carga']);
+        $peso_maximo = floatval($_POST['peso_maximo']);
+        $data_disponivel = $_POST['data_disponivel'];
+        $prazo_entrega = intval($_POST['prazo_entrega']);
         
-        <div class="oferta-details">
-            <div class="detail-item">
-                <div class="detail-label">Local Sa�da:</div>
-                <div class="detail-value">Bras�lia - DF</div>
-            </div>
-            
-            <div class="detail-item">
-                <div class="detail-label">Local Chegada:</div>
-                <div class="detail-value">Manaus - AM</div>
-            </div>
-            
-            <div class="detail-item">
-                <div class="detail-label">Valor:</div>
-                <div class="detail-value">R$ 400,00</div>
-            </div>
-            
-            <div class="detail-item">
-                <div class="detail-label">Status:</div>
-                <div class="status-icon">?</div>
-            </div>
-        </div>
+        // Validações
+        if (empty($origem) || empty($destino) || $preco <= 0) {
+            $erro = 'Origem, destino e preço são obrigatórios.';
+        } else {
+            try {
+                $stmt = $pdo->prepare("INSERT INTO ofertas (usuario_id, origem, destino, preco, descricao, tipo_carga, peso_maximo, data_disponivel, prazo_entrega) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                $stmt->execute([$_SESSION['usuario_id'], $origem, $destino, $preco, $descricao, $tipo_carga, $peso_maximo, $data_disponivel, $prazo_entrega]);
+                
+                $sucesso = 'Oferta criada com sucesso!';
+                $modo = 'listar';
+            } catch (PDOException $e) {
+                $erro = 'Erro ao criar oferta. Tente novamente.';
+            }
+        }
+    }
+
+    // EDITAR OFERTA
+    if ($_SERVER['REQUEST_METHOD'] == 'POST' && $modo == 'editar') {
+        $origem = trim($_POST['origem']);
+        $destino = trim($_POST['destino']);
+        $preco = floatval($_POST['preco']);
+        $descricao = trim($_POST['descricao']);
+        $tipo_carga = trim($_POST['tipo_carga']);
+        $peso_maximo = floatval($_POST['peso_maximo']);
+        $data_disponivel = $_POST['data_disponivel'];
+        $prazo_entrega = intval($_POST['prazo_entrega']);
+        $status = $_POST['status'];
         
-        <div class="buttons">
-            <button class="btn btn-edit">Editar</button>
-            <button class="btn btn-delete">Excluir</button>
-        </div>
-    </div>
-    
-    <div style="text-align: center; margin-top: 30px;">
-        <a href="index.php" class="btn" style="background: #6b46c1; color: white;">Voltar ao In�cio</a>
-    </div>
-</body>
-</html>
+        // Validações
+        if (empty($origem) || empty($destino) || $preco <= 0) {
+            $erro = 'Origem, destino e preço são obrigatórios.';
+        } else {
+            try {
+                $stmt = $pdo->prepare("UPDATE ofertas SET origem = ?, destino = ?, preco = ?, descricao = ?, tipo_carga = ?, peso_maximo = ?, data_disponivel = ?, prazo_entrega = ?, status = ? WHERE id = ? AND usuario_id = ?");
+                $stmt->execute([$origem, $destino, $preco, $descricao, $tipo_carga, $peso_maximo, $data_disponivel, $prazo_entrega, $status, $oferta_id, $_SESSION['usuario_id']]);
+                
+                $sucesso = 'Oferta atualizada com sucesso!';
+                $modo = 'listar';
+            } catch (PDOException $e) {
+                $erro = 'Erro ao atualizar oferta. Tente novamente.';
+            }
+        }
+    }
+
+    // EXCLUIR OFERTA
+    if ($modo == 'excluir' && $oferta_id > 0) {
+        try {
+            $stmt = $pdo->prepare("DELETE FROM ofertas WHERE id = ? AND usuario_id = ?");
+            $stmt->execute([$oferta_id, $_SESSION['usuario_id']]);
+            
+            if ($stmt->rowCount() > 0) {
+                $sucesso = 'Oferta excluída com sucesso!';
+            } else {
+                $erro = 'Oferta não encontrada.';
+            }
+        } catch (PDOException $e) {
+            $erro = 'Erro ao excluir oferta. Tente novamente.';
+        }
+        $modo = 'listar';
+    }
+
+    // BUSCAR OFERTAS DO USUÁRIO
+    $ofertas = [];
+    if ($modo == 'listar') {
+        try {
+            $stmt = $pdo->prepare("SELECT * FROM ofertas WHERE usuario_id = ? ORDER BY created_at DESC");
+            $stmt->execute([$_SESSION['usuario_id']]);
+            $ofertas = $stmt->fetchAll();
+        } catch (PDOException $e) {
+            $erro = 'Erro ao carregar ofertas.';
+        }
+    }
+
+    // BUSCAR OFERTA ESPECÍFICA PARA EDIÇÃO
+    $oferta_atual = null;
+    if ($modo == 'editar' && $oferta_id > 0) {
+        try {
+            $stmt = $pdo->prepare("SELECT * FROM ofertas WHERE id = ? AND usuario_id = ?");
+            $stmt->execute([$oferta_id, $_SESSION['usuario_id']]);
+            $oferta_atual = $stmt->fetch();
+            
+            if (!$oferta_atual) {
+                $erro = 'Oferta não encontrada.';
+                $modo = 'listar';
+            }
+        } catch (PDOException $e) {
+            $erro = 'Erro ao carregar oferta.';
+            $modo = 'listar';
+        }
+    }
+    ?>
+
+    <!DOCTYPE html>
+    <html lang="pt-BR">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Minhas Ofertas - AirFrete</title>
+        <link rel="stylesheet" href="./styles/ofertas.css">
+    </head>
+    <body>
+        <header>
+            <div class="logo"><a href="index.php" class="home">AIR FRETE</a></div>
+            <div class="about">
+                <?php if (isset($_SESSION['usuario_id'])): ?>
+                    <!-- Usuário logado -->
+                    <div class="user-welcome">
+                        <span>Bem-vindo, <?php echo htmlspecialchars($_SESSION['usuario_nome']); ?>!</span>
+                        <button><a href="ofertas.php">Minhas Ofertas</a></button>
+                        <button><a href="ofertas.php?logout=1">Sair</a></button>
+                    </div>
+                <?php else: ?>
+                    <!-- Usuário não logado -->
+                    <button><a href="login.php">Login</a></button>
+                    <button><a href="cadastro.php">Cadastro</a></button>
+                <?php endif; ?>
+            </div>
+        </header>
+        
+        <?php if ($erro): ?>
+            <div style="max-width: 800px; margin: 20px auto;">
+                <div class="error"><?php echo htmlspecialchars($erro); ?></div>
+            </div>
+        <?php endif; ?>
+        
+        <?php if ($sucesso): ?>
+            <div style="max-width: 800px; margin: 20px auto;">
+                <div class="success"><?php echo htmlspecialchars($sucesso); ?></div>
+            </div>
+        <?php endif; ?>
+
+        <?php if ($modo == 'listar'): ?>
+            <div style="text-align: center; margin: 20px;">
+                <a href="?modo=criar" class="btn" style="background: #10b981; color: white;">Nova Oferta</a>
+            </div>
+            
+            <div class="ofertas-grid">
+                <?php if (empty($ofertas)): ?>
+                    <div class="no-ofertas">
+                        <h3>Nenhuma oferta encontrada</h3>
+                        <p>Crie sua primeira oferta de frete para começar!</p>
+                    </div>
+                <?php else: ?>
+                    <?php foreach ($ofertas as $oferta): ?>
+                        <div class="oferta-card">
+                            <div class="oferta-header">
+                                <?php echo htmlspecialchars($oferta['origem']); ?> → <?php echo htmlspecialchars($oferta['destino']); ?>
+                                <span class="status-badge status-<?php echo $oferta['status']; ?>">
+                                    <?php echo ucfirst($oferta['status']); ?>
+                                </span>
+                            </div>
+                            
+                            <div class="oferta-details">
+                                <div class="detail-item">
+                                    <div class="detail-label">Valor:</div>
+                                    <div class="detail-value">R$ <?php echo number_format($oferta['preco'], 2, ',', '.'); ?></div>
+                                </div>
+                                
+                                <div class="detail-item">
+                                    <div class="detail-label">Tipo de Carga:</div>
+                                    <div class="detail-value"><?php echo htmlspecialchars($oferta['tipo_carga'] ?? 'Não especificado'); ?></div>
+                                </div>
+                                
+                                <div class="detail-item">
+                                    <div class="detail-label">Peso Máximo:</div>
+                                    <div class="detail-value"><?php echo $oferta['peso_maximo'] ? number_format($oferta['peso_maximo'], 1) . ' kg' : 'Não especificado'; ?></div>
+                                </div>
+                                
+                                <div class="detail-item">
+                                    <div class="detail-label">Prazo:</div>
+                                    <div class="detail-value"><?php echo $oferta['prazo_entrega'] ? $oferta['prazo_entrega'] . ' dias' : 'Não especificado'; ?></div>
+                                </div>
+                            </div>
+                            
+                            <?php if ($oferta['descricao']): ?>
+                                <div style="margin: 15px 0; color: #6b7280;">
+                                    <?php echo htmlspecialchars($oferta['descricao']); ?>
+                                </div>
+                            <?php endif; ?>
+                            
+                            <div class="buttons">
+                                <a href="?modo=editar&id=<?php echo $oferta['id']; ?>" class="btn btn-edit">Editar</a>
+                                <a href="?modo=excluir&id=<?php echo $oferta['id']; ?>" class="btn btn-delete" 
+                                onclick="return confirm('Tem certeza que deseja excluir esta oferta?')">Excluir</a>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </div>
+            
+        <?php elseif ($modo == 'criar' || $modo == 'editar'): ?>
+            <div class="form-ofertas">
+                <h2 style="margin-bottom: 15px;"><?php echo $modo == 'criar' ? 'Nova Oferta' : 'Editar Oferta'; ?></h2>
+                
+                <form method="POST">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="origem">Origem *:</label>
+                            <input type="text" id="origem" name="origem" required 
+                                value="<?php echo $oferta_atual ? htmlspecialchars($oferta_atual['origem']) : ''; ?>"
+                                placeholder="Ex: São Paulo - SP">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="destino">Destino *:</label>
+                            <input type="text" id="destino" name="destino" required 
+                                value="<?php echo $oferta_atual ? htmlspecialchars($oferta_atual['destino']) : ''; ?>"
+                                placeholder="Ex: Rio de Janeiro - RJ">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="preco">Preço (R$) *:</label>
+                            <input type="number" id="preco" name="preco" step="0.01" min="0" required 
+                                value="<?php echo $oferta_atual ? $oferta_atual['preco'] : ''; ?>">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="tipo_carga">Tipo de Carga:</label>
+                            <select id="tipo_carga" name="tipo_carga">
+                                <option value="">Selecione</option>
+                                <option value="Documentos" <?php echo ($oferta_atual && $oferta_atual['tipo_carga'] == 'Documentos') ? 'selected' : ''; ?>>Documentos</option>
+                                <option value="Eletrônicos" <?php echo ($oferta_atual && $oferta_atual['tipo_carga'] == 'Eletrônicos') ? 'selected' : ''; ?>>Eletrônicos</option>
+                                <option value="Móveis" <?php echo ($oferta_atual && $oferta_atual['tipo_carga'] == 'Móveis') ? 'selected' : ''; ?>>Móveis</option>
+                                <option value="Roupas" <?php echo ($oferta_atual && $oferta_atual['tipo_carga'] == 'Roupas') ? 'selected' : ''; ?>>Roupas</option>
+                                <option value="Alimentos" <?php echo ($oferta_atual && $oferta_atual['tipo_carga'] == 'Alimentos') ? 'selected' : ''; ?>>Alimentos</option>
+                                <option value="Geral" <?php echo ($oferta_atual && $oferta_atual['tipo_carga'] == 'Geral') ? 'selected' : ''; ?>>Carga Geral</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="peso_maximo">Peso Máximo (kg):</label>
+                            <input type="number" id="peso_maximo" name="peso_maximo" step="0.1" min="0" 
+                                value="<?php echo $oferta_atual ? $oferta_atual['peso_maximo'] : ''; ?>">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="prazo_entrega">Prazo de Entrega (dias):</label>
+                            <input type="number" id="prazo_entrega" name="prazo_entrega" min="1" 
+                                value="<?php echo $oferta_atual ? $oferta_atual['prazo_entrega'] : ''; ?>">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="data_disponivel">Data Disponível:</label>
+                            <input type="date" id="data_disponivel" name="data_disponivel" 
+                                value="<?php echo $oferta_atual ? $oferta_atual['data_disponivel'] : ''; ?>">
+                        </div>
+                        
+                        <?php if ($modo == 'editar'): ?>
+                        <div class="form-group">
+                            <label for="status">Status:</label>
+                            <select id="status" name="status">
+                                <option value="ativa" <?php echo ($oferta_atual && $oferta_atual['status'] == 'ativa') ? 'selected' : ''; ?>>Ativa</option>
+                                <option value="pausada" <?php echo ($oferta_atual && $oferta_atual['status'] == 'pausada') ? 'selected' : ''; ?>>Pausada</option>
+                                <option value="finalizada" <?php echo ($oferta_atual && $oferta_atual['status'] == 'finalizada') ? 'selected' : ''; ?>>Finalizada</option>
+                            </select>
+                        </div>
+                        <?php endif; ?>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="descricao">Descrição:</label>
+                        <textarea id="descricao" name="descricao" rows="4" 
+                                placeholder="Descreva detalhes sobre o frete..."><?php echo $oferta_atual ? htmlspecialchars($oferta_atual['descricao']) : ''; ?></textarea>
+                    </div>
+                    
+                    <div class="btn-group"> 
+                        <button type="submit" class="btn" style="background: #10b981; color: white;">
+                            <?php echo $modo == 'criar' ? 'Criar Oferta' : 'Salvar Alterações'; ?>
+                        </button>
+                        <a href="?modo=listar" class="btn" style="background: #6b7280; color: white;">Cancelar</a>
+                    </div>
+                </form>
+            </div>
+        <?php endif; ?>
+    </body>
+    </html>

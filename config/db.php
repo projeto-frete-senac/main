@@ -9,7 +9,7 @@ try {
     // Criar conex�o PDO
     $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8", $username, $password);
     
-    // Configurar PDO para lan�ar exce��es em caso de erro
+    // Configurar PDO para lançar exce��es em caso de erro
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     
     // Configurar para retornar arrays associativos por padr�o
