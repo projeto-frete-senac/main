@@ -7,8 +7,8 @@ session_start();
 
 require_once 'config/db.php';
 
-// Consulta para preencher os filtros (ordenado alfabeticamente)
-$estados = $pdo->query("SELECT DISTINCT origem FROM ofertas UNION SELECT DISTINCT destino FROM ofertas ORDER BY 1")->fetchAll(PDO::FETCH_COLUMN);
+// Consulta para preencher os filtros
+$estados = $pdo->query("SELECT DISTINCT origem FROM ofertas UNION SELECT DISTINCT destino FROM ofertas")->fetchAll(PDO::FETCH_COLUMN);
 $valores = $pdo->query("SELECT MIN(preco) as min, MAX(preco) as max FROM ofertas WHERE status = 'ativa'")->fetch(PDO::FETCH_ASSOC);
 
 // Valores padrão
@@ -20,7 +20,7 @@ $origem = $_GET['origem'] ?? '';
 $destino = $_GET['destino'] ?? '';
 $precoMax = $_GET['valor'] ?? $maxValor;
 
-// Consulta com filtros (ordenado do mais recente para o mais antigo)
+// Consulta com filtros
 $sql = "SELECT * FROM ofertas WHERE status = 'ativa'";
 $params = [];
 
@@ -38,9 +38,6 @@ if (is_numeric($precoMax)) {
     $sql .= " AND preco <= :preco";
     $params[':preco'] = $precoMax;
 }
-
-// Adiciona ordenação por data/ID mais recente
-$sql .= " ORDER BY id DESC";
 
 $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
@@ -75,52 +72,7 @@ $ofertas = $stmt->fetchAll();
             background-color: #764ba2;
         }
 
-        /* Estilos adicionais para a barra de preço roxa */
-        .price #range {
-            width: 100%;
-            height: 8px;
-            border-radius: 10px;
-            background: linear-gradient(45deg, #e5e7eb, #d1d5db);
-            outline: none;
-            -webkit-appearance: none;
-            appearance: none;
-            margin-bottom: 15px;
-            transition: all 0.3s ease;
-        }
-
-        .price #range::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 25px;
-            height: 25px;
-            border-radius: 50%;
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-            transition: all 0.3s ease;
-        }
-
-        .price #range::-webkit-slider-thumb:hover {
-            transform: scale(1.2);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
-        }
-
-        .price #range::-moz-range-thumb {
-            width: 25px;
-            height: 25px;
-            border-radius: 50%;
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            cursor: pointer;
-            border: none;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-            transition: all 0.3s ease;
-        }
-
-        .price #range::-moz-range-track {
-            height: 8px;
-            border-radius: 10px;
-            background: transparent;
-        }
+        
     </style>
 </head>
 <body>
@@ -208,29 +160,10 @@ $ofertas = $stmt->fetchAll();
         const rangeInput = document.getElementById('range');
         const labels = document.querySelectorAll('.range-labels span');
 
-        // Função para atualizar a barra de preço com preenchimento roxo
-        function updateSlider() {
-            const value = rangeInput.value;
-            const min = rangeInput.min;
-            const max = rangeInput.max;
-            const percentage = ((value - min) / (max - min)) * 100;
-            
-            rangeInput.style.background = `linear-gradient(to right, 
-                #667eea 0%, 
-                #764ba2 ${percentage}%, 
-                #e5e7eb ${percentage}%, 
-                #d1d5db 100%)`;
-            
-            labels[1].textContent = 'R$ ' + value;
-        }
+        rangeInput.addEventListener('input', function() {
+            labels[1].textContent = 'R$ ' + this.value;
+        });
 
-        // Atualiza quando o usuário move o slider
-        rangeInput.addEventListener('input', updateSlider);
-        
-        // Inicializa a barra com o valor atual
-        updateSlider();
-
-        // Carrossel
         const carrossel = document.getElementById("carrossel-ofertas");
         document.getElementById("prev-btn").addEventListener("click", () => {
             carrossel.scrollBy({ left: -300, behavior: "smooth" });

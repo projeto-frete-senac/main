@@ -12,7 +12,7 @@ mb_http_output('UTF-8');
 
 $erro = '';
 
-// Se j� estiver logado, redirecionar para ofertas
+// Se já estiver logado, redirecionar para ofertas
 if (isset($_SESSION['usuario_id'])) {
     header('Location: ofertas.php');
     exit;
@@ -22,17 +22,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $email = trim($_POST['email']);
     $senha = $_POST['senha'];
 
-    // Valida��es b�sicas
+    // Validaçõess básicas
     if (empty($email) || empty($senha)) {
         $erro = 'Email e senha são obrigatórios.';
     } else {
         try {
-            // Buscar usu�rio no banco
+            // Buscar usuário no banco
             $stmt = $pdo->prepare("SELECT id, nome, email, senha FROM usuario WHERE email = ?");
             $stmt->execute([$email]);
             $usuario = $stmt->fetch();
 
-            // ALTERA��O: Verificar senha usando password_verify
             if ($usuario && password_verify($senha, $usuario['senha'])) {
                 // Login bem-sucedido
                 $_SESSION['usuario_id'] = $usuario['id'];

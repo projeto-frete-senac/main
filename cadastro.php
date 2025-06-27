@@ -15,10 +15,11 @@
     if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $username = trim($_POST['username']);
         $email = trim($_POST['email']);
+        $telefone = trim($_POST['telefone']);
         $senha = $_POST['senha'];
         $confirmar_senha = $_POST['confirmar_senha'];
         
-        // Valida��es
+        // Validações
         if (empty($username) || empty($email) || empty($senha) || empty($confirmar_senha)) {
             $erro = 'Todos os campos são obrigatórios.';
         } elseif ($senha !== $confirmar_senha) {
@@ -29,24 +30,23 @@
             $erro = 'Email inválido.';
         } else {
             try {
-                // Verificar se o email j� existe
+                // Verificar se o email já existe
                 $stmt = $pdo->prepare("SELECT id FROM usuario WHERE email = ?");
                 $stmt->execute([$email]);
                 
                 if ($stmt->rowCount() > 0) {
                     $erro = 'Este email já está cadastrado.';
                 } else {
-                    // ALTERA��O: Gerar hash da senha
                     $senha_hash = password_hash($senha, PASSWORD_DEFAULT);
                     
                     // Inserir novo usuário com senha hasheada
-                    $stmt = $pdo->prepare("INSERT INTO usuario (nome, email, senha) VALUES (?, ?, ?)");
-                    $stmt->execute([$username, $email, $senha_hash]);
+                    $stmt = $pdo->prepare("INSERT INTO usuario (nome, email, telefone, senha) VALUES (?, ?, ?, ?)");
+                    $stmt->execute([$username, $email, $telefone, $senha_hash]);
                     
-                    // Obter o ID do usuário rec�m-cadastrado
+                    // Obter o ID do usuário recém-cadastrado
                     $usuario_id = $pdo->lastInsertId();
                     
-                    // Fazer login autom�tico
+                    // Fazer login automático
                     $_SESSION['usuario_id'] = $usuario_id;
                     $_SESSION['usuario_nome'] = $username;
                     $_SESSION['usuario_email'] = $email;
@@ -98,6 +98,11 @@
                     <label for="email">Email:</label>
                     <input type="email" id="email" name="email" required 
                         value="<?php echo isset($_POST['email']) ? htmlspecialchars($_POST['email']) : ''; ?>">
+                </div>
+
+                <div class="form-group">
+                    <label for="telefone">Telefone:</label>
+                    <input type="tel" name="telefone" id="telefone" required placeholder="(11) 91234-5678">
                 </div>
                 
                 <div class="form-group">
