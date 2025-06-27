@@ -502,3 +502,16 @@ body::after {
         margin-right: 6px;
     }
 }
+
+/* Melhor suporte para notebooks com altura limitada */
+@media (max-height: 800px) {
+    .form-container {
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    body {
+        align-items: flex-start;
+        padding-top: 20px;
+    }
+}

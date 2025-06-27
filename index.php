@@ -52,8 +52,6 @@ $ofertas = $stmt->fetchAll();
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="AirFrete - Encontre o melhor frete aéreo com facilidade e praticidade"/>
-    <meta name="keywords" content="frete aéreo, transporte, logística, AirFrete" />
     <title>AirFrete - Encontre seu frete ideal</title>
     <link rel="stylesheet" href="styles/index.css">
     <style>

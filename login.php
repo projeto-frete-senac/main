@@ -88,6 +88,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         <div class="form-link">
             <p>Não tem conta? <a href="cadastro.php">Cadastre-se</a></p>
+            <p><a href="esqueceu_senha.php">Esqueceu a senha?</a></p>
         </div>
     </div>
 </body>

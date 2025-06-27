@@ -96,6 +96,8 @@ header {
     top: 0;
     z-index: 100;
     animation: slideInRight 0.8s ease-out;
+    flex-wrap: wrap;
+    gap: 15px;
 }
 
 .logo {
@@ -104,6 +106,7 @@ header {
     color: white;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
     animation: pulse 2s infinite;
+    flex-shrink: 0;
 }
 
 .logo a {
@@ -121,8 +124,10 @@ header {
 .user-welcome {
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 15px;
     animation: fadeInUp 1s ease-out 0.2s both;
+    flex-wrap: wrap;
+    justify-content: center;
 }
 
 .user-welcome span {
@@ -130,9 +135,17 @@ header {
     font-weight: 600;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
     font-size: 16px;
+    white-space: nowrap;
 }
 
 /* Botões do header */
+.about {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
 .about button {
     background: linear-gradient(45deg, #ff6b6b, #ff8e53);
     color: white;
@@ -145,7 +158,8 @@ header {
     box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
     position: relative;
     overflow: hidden;
-    margin-left: 15px;
+    flex-shrink: 0;
+    white-space: nowrap;
 }
 
 .about button::before {
@@ -379,6 +393,7 @@ header {
     justify-content: center;
     gap: 5px;
     margin-bottom: 20px;
+    flex-wrap: wrap;
 }
 
 .priceContainer span {
@@ -405,109 +420,159 @@ header {
     font-style: italic;
 }
 
+/* Carrossel */
 .carrossel-wrapper {
-  position: relative;
-  width: 100%;
-  max-width: 1000px;
-  margin: 40px auto;
-  overflow: hidden;
-  padding: 0 40px;
-  box-sizing: border-box;
+    position: relative;
+    width: 100%;
+    max-width: 1000px;
+    margin: 40px auto;
+    overflow: hidden;
+    padding: 0 40px;
+    box-sizing: border-box;
 }
 
 .carrossel {
-  display: flex;
-  flex-wrap: nowrap;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  gap: 20px;
-  padding: 20px 0;
-  scrollbar-width: none;
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    gap: 20px;
+    padding: 20px 0;
+    scrollbar-width: none;
 }
 
 .carrossel::-webkit-scrollbar {
-  display: none;
+    display: none;
 }
 
 .oferta-card {
-  flex: 0 0 auto;
-  width: 250px;
-  height: 160px;
-  background: white;
-  border-radius: 10px;
-  padding: 20px;
-  scroll-snap-align: start;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
-  transition: transform 0.3s;
-  margin-left: 10px;
+    flex: 0 0 auto;
+    width: 250px;
+    height: 160px;
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    scroll-snap-align: start;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+    transition: transform 0.3s;
+    margin-left: 10px;
 }
 
 .oferta-card:hover {
-  transform: scale(1.05);
-  cursor: pointer;
-  box-shadow: 0 3px 10px rgba(0,0,0,0.35);
-  transition-duration: .2s;
+    transform: scale(1.05);
+    cursor: pointer;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.35);
+    transition-duration: .2s;
 }
 
 .oferta-card-link {
-  text-decoration: none;
-  color: inherit;
+    text-decoration: none;
+    color: inherit;
 }
 
 .carrossel-btn {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  background-color: rgba(0, 0, 0, 0.5);
-  border: none;
-  color: white;
-  font-size: 24px;
-  padding: 10px;
-  border-radius: 50%;
-  cursor: pointer;
-  z-index: 100;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: rgba(0, 0, 0, 0.5);
+    border: none;
+    color: white;
+    font-size: 24px;
+    padding: 10px;
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 100;
+    transition: all 0.3s ease;
+}
+
+.carrossel-btn:hover {
+    background-color: rgba(0, 0, 0, 0.7);
+    transform: translateY(-50%) scale(1.1);
 }
 
 #prev-btn {
-  left: 10px;
+    left: 10px;
 }
 
 #next-btn {
-    position: fixed;
-    right: 100px;
+    right: 10px;
 }
 
-/* Responsividade */
-@media (max-width: 1024px) {
+/* Responsividade para tablets grandes e laptops pequenos */
+@media (max-width: 1200px) {
     .container {
-        grid-template-columns: 300px 1fr;
+        grid-template-columns: 320px 1fr;
         gap: 30px;
         padding: 0 30px;
     }
     
+    header {
+        padding: 18px 30px;
+    }
+    
+    .carrossel-wrapper {
+        padding: 0 30px;
+    }
+}
+
+/* Responsividade para tablets */
+@media (max-width: 1024px) {
+    .container {
+        grid-template-columns: 300px 1fr;
+        gap: 25px;
+        padding: 0 25px;
+    }
+    
     .cardFilter {
         padding: 25px;
+        top: 100px;
     }
     
     .card {
         padding: 30px;
+        max-width: 350px;
+    }
+    
+    .right {
+        gap: 25px;
+    }
+    
+    header {
+        padding: 16px 25px;
+    }
+    
+    .logo {
+        font-size: 26px;
+    }
+    
+    .carrossel-wrapper {
+        padding: 0 25px;
+    }
+    
+    .oferta-card {
+        width: 220px;
+        height: 150px;
+        padding: 18px;
     }
 }
 
-@media (max-width: 768px) {
+/* Responsividade para tablets pequenos */
+@media (max-width: 900px) {
     header {
-        padding: 15px 20px;
         flex-direction: column;
-        gap: 15px;
+        align-items: center;
+        gap: 20px;
+        padding: 20px;
     }
     
     .user-welcome {
-        flex-direction: column;
-        gap: 10px;
+        order: 1;
+        justify-content: center;
     }
     
-    .about button {
-        margin: 0 5px;
+    .about {
+        order: 2;
+        justify-content: center;
     }
     
     .container {
@@ -527,21 +592,35 @@ header {
         gap: 20px;
     }
     
-    .next-btn {
-        width: 50px;
-        height: 50px;
-        font-size: 20px;
-        align-self: center;
+    .carrossel-wrapper {
+        padding: 0 20px;
     }
 }
 
-@media (max-width: 480px) {
+/* Responsividade para smartphones */
+@media (max-width: 768px) {
     header {
-        padding: 10px 15px;
+        padding: 15px 20px;
+        gap: 15px;
     }
     
     .logo {
         font-size: 24px;
+    }
+    
+    .user-welcome {
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
+    }
+    
+    .user-welcome span {
+        font-size: 14px;
+    }
+    
+    .about {
+        flex-direction: column;
+        gap: 10px;
     }
     
     .about button {
@@ -552,10 +631,20 @@ header {
     .container {
         padding: 0 15px;
         margin: 15px auto;
+        gap: 25px;
     }
     
     .cardFilter {
         padding: 20px;
+    }
+    
+    .field select {
+        padding: 12px 16px;
+        font-size: 14px;
+    }
+    
+    .field label {
+        font-size: 12px;
     }
     
     .card {
@@ -564,15 +653,256 @@ header {
     }
     
     .card h3 {
+        font-size: 22px;
+    }
+    
+    .priceContainer p {
+        font-size: 32px;
+    }
+    
+    .priceContainer span {
+        font-size: 18px;
+    }
+    
+    .description {
+        font-size: 14px;
+        padding: 15px;
+    }
+    
+    .carrossel-wrapper {
+        padding: 0 15px;
+        margin: 30px auto;
+    }
+    
+    .oferta-card {
+        width: 200px;
+        height: 140px;
+        padding: 15px;
+    }
+    
+    .carrossel-btn {
         font-size: 20px;
+        padding: 8px;
+    }
+    
+    #prev-btn, #next-btn {
+        left: 5px;
+    }
+    
+    #next-btn {
+        right: 5px;
+        left: auto;
+    }
+}
+
+/* Responsividade para smartphones pequenos */
+@media (max-width: 480px) {
+    header {
+        padding: 12px 15px;
+    }
+    
+    .logo {
+        font-size: 22px;
+    }
+    
+    .about button {
+        padding: 8px 16px;
+        font-size: 13px;
+    }
+    
+    .container {
+        padding: 0 10px;
+        margin: 10px auto;
+        gap: 20px;
+    }
+    
+    .cardFilter {
+        padding: 15px;
+    }
+    
+    .field {
+        margin-bottom: 20px;
+    }
+    
+    .field select {
+        padding: 10px 14px;
+        font-size: 14px;
+    }
+    
+    .price {
+        margin-top: 25px;
+    }
+    
+    #range::-webkit-slider-thumb {
+        width: 20px;
+        height: 20px;
+    }
+    
+    #range::-moz-range-thumb {
+        width: 20px;
+        height: 20px;
+    }
+    
+    .range-labels {
+        font-size: 12px;
+    }
+    
+    .card {
+        padding: 20px;
+    }
+    
+    .card h3 {
+        font-size: 20px;
+        margin-bottom: 15px;
+    }
+    
+    .priceContainer {
+        margin-bottom: 15px;
     }
     
     .priceContainer p {
         font-size: 28px;
     }
     
+    .priceContainer span {
+        font-size: 16px;
+    }
+    
     .description {
-        font-size: 14px;
+        font-size: 13px;
+        padding: 12px;
+    }
+    
+    .carrossel-wrapper {
+        padding: 0 10px;
+        margin: 25px auto;
+    }
+    
+    .oferta-card {
+        width: 180px;
+        height: 130px;
+        padding: 12px;
+        font-size: 13px;
+    }
+    
+    .carrossel {
+        gap: 15px;
+        padding: 15px 0;
+    }
+    
+    .carrossel-btn {
+        font-size: 18px;
+        padding: 6px;
+        width: 35px;
+        height: 35px;
+    }
+}
+
+/* Responsividade extrema para dispositivos muito pequenos */
+@media (max-width: 360px) {
+    .logo {
+        font-size: 20px;
+    }
+    
+    .user-welcome span {
+        font-size: 12px;
+    }
+    
+    .about button {
+        padding: 6px 12px;
+        font-size: 12px;
+    }
+    
+    .cardFilter {
+        padding: 12px;
+    }
+    
+    .card {
         padding: 15px;
+    }
+    
+    .card h3 {
+        font-size: 18px;
+    }
+    
+    .priceContainer p {
+        font-size: 24px;
+    }
+    
+    .priceContainer span {
+        font-size: 14px;
+    }
+    
+    .description {
+        font-size: 12px;
+        padding: 10px;
+    }
+    
+    .oferta-card {
+        width: 160px;
+        height: 120px;
+        padding: 10px;
+        font-size: 12px;
+    }
+    
+    .carrossel-btn {
+        font-size: 16px;
+        padding: 5px;
+        width: 30px;
+        height: 30px;
+    }
+}
+
+/* Melhorias de acessibilidade e usabilidade */
+@media (hover: none) and (pointer: coarse) {
+    .card:hover {
+        transform: none;
+    }
+    
+    .cardFilter:hover {
+        transform: none;
+    }
+    
+    .about button:hover {
+        transform: none;
+    }
+    
+    .oferta-card:hover {
+        transform: none;
+    }
+}
+
+/* Suporte para orientação landscape em dispositivos móveis */
+@media (max-width: 768px) and (orientation: landscape) {
+    header {
+        flex-direction: row;
+        justify-content: space-between;
+        padding: 10px 20px;
+    }
+    
+    .user-welcome {
+        flex-direction: row;
+        gap: 15px;
+    }
+    
+    .about {
+        flex-direction: row;
+        gap: 10px;
+    }
+    
+    .container {
+        grid-template-columns: 250px 1fr;
+        gap: 20px;
+    }
+    
+    .cardFilter {
+        position: sticky;
+        top: 80px;
+        padding: 15px;
+    }
+    
+    .right {
+        flex-direction: row;
+        gap: 15px;
     }
 }

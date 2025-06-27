@@ -51,7 +51,7 @@
                     $_SESSION['usuario_nome'] = $username;
                     $_SESSION['usuario_email'] = $email;
                     
-                    // Redirecionar para a p�gina de ofertas
+                    // Redirecionar para a página de ofertas
                     header('Location: ofertas.php');
                     exit;
                 }
